@@ -1,3 +1,5 @@
+import copy
+
 import numpy as np
 import pytest
 import torch
@@ -36,6 +38,15 @@ def test_prune_ratio_zero_is_exact_copy_and_half_halves_channels(teacher, data):
     with torch.no_grad():
         assert torch.allclose(prune_channels(teacher, 0.0)(x), teacher(x), atol=1e-5)
     half = prune_channels(teacher, 0.5)
+    # surgery check at 0.5: zeroing the dropped filters in the teacher must give the pruned model's outputs
+    masked = copy.deepcopy(teacher)
+    with torch.no_grad():
+        norms = [getattr(teacher.features, n).weight.abs().sum((1, 2, 3)) for n in ("conv1", "conv2", "conv3")]
+        for name, nm, k in zip(("conv1", "conv2", "conv3"), norms, (4, 8, 16)):
+            dropped = nm.argsort(descending=True)[k:]
+            getattr(masked.features, name).weight[dropped] = 0
+            getattr(masked.features, name).bias[dropped] = 0
+        assert torch.allclose(masked(x), half(x), atol=1e-5)
     assert [half.features.conv1.out_channels, half.features.conv2.out_channels, half.features.conv3.out_channels] == [4, 8, 16]
     assert sum(p.numel() for p in half.parameters()) < 0.6 * sum(p.numel() for p in teacher.parameters())
 

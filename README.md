@@ -23,7 +23,7 @@ python study.py            # full study, ~1.5 min on 4 vCPUs → results/results
 ```
 
 ## Architecture
-`compress/core.py` holds everything (≈170 lines); `study.py` runs the experiment.
+`compress/core.py` holds everything (≈150 lines); `study.py` runs the experiment.
 
 | step | how |
 |---|---|
@@ -37,7 +37,8 @@ python study.py            # full study, ~1.5 min on 4 vCPUs → results/results
 | measurement | test accuracy (360 images); median latency over 50 runs at batch 1 and 64, **1 intra-op thread** everywhere; size = serialized bytes |
 
 The tests check:
-- pruning with ratio 0 reproduces the teacher's outputs exactly, which validates the weight surgery;
+- pruning with ratio 0 reproduces the teacher's outputs exactly;
+- at ratio 0.5, the pruned model equals the teacher with the dropped filters zeroed, which validates the weight surgery including fc1's column mapping;
 - 50 % pruning halves the channels;
 - both int8 models are smaller and within 3 points of the teacher's accuracy;
 - ONNX outputs match PyTorch within 1e-4;
@@ -60,9 +61,9 @@ The tests check:
 
 Findings:
 - **Static int8 is the clear winner here: no accuracy loss, 4× smaller, 10.8× faster at batch 64.** Part of that speed-up is this CPU's AMX int8 tile unit, which oneDNN uses for int8 convolutions. On a CPU with only AVX2 or VNNI, expect closer to 2-4×.
-- **Dynamic quantisation only shrinks the model.** It quantises Linear layers, which hold 95 % of the bytes (fc1) but almost none of the FLOPs. The convolutions stay fp32, so it is not faster (0.91×, within noise). It suits Linear-heavy models such as transformers and LSTMs.
+- **Dynamic quantisation only shrinks the model.** It quantises Linear layers, which hold 95 % of the bytes (fc1) but almost none of the FLOPs. The convolutions stay fp32, so it is about the same speed, slightly slower (0.91×). It suits Linear-heavy models such as transformers and LSTMs.
 - **Structured pruning needs fine-tuning.** Removing half the filters drops accuracy to 47 %. Two epochs of fine-tuning bring it back to 95.6 % (-1.1 points) for 2× smaller and 2.2× faster. Speed-ups come from real channel removal; masks would give none.
-- **Distillation did not help here.** The 4× student ties with training from scratch (0.958). The tiny 16× student does worse with KD (0.850 vs 0.886), because with α=0.7 and only 8 epochs a very small model fits the soft targets worse than the labels. KD usually pays off with more data, longer training or a tuned α/T. None of those were swept, to avoid tuning on the test set. The smaller *architecture* is what gives the 7-20× speed-ups.
+- **Distillation did not help here.** The 4× student ties with training from scratch (0.958). The tiny 16× student does worse with KD (0.850 vs 0.886), likely because with α=0.7 and only 8 epochs a very small model fits the soft targets worse than the labels. This is a hypothesis from one seed, not tested. KD usually pays off with more data, longer training or a tuned α/T. None of those were swept, to avoid tuning on the test set. The smaller *architecture* is what gives the 7-20× speed-ups.
 - **ONNX Runtime beats PyTorch eager on the same fp32 graph**: 2.5× at batch 1 (0.85 vs 2.1 ms), 1.7× at batch 64, with identical accuracy. Distilled student + ORT is 13.6× faster than the teacher in PyTorch at -0.9 points.
 
 Caveats: the test set has 360 images, so accuracy differences under about 1.5 points are noise. Latencies are single-thread medians on a shared VM (±10 %).

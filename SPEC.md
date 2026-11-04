@@ -9,6 +9,6 @@ Build "Model compression: quantisation, pruning, distillation". Take a pretraine
 - [x] ONNX export benchmarked
 - [x] Tests pass with one command; CI workflow runs them
 - [x] README with setup, usage, architecture and results
-- [ ] Self code review done
+- [x] Self code review done
 - [ ] Draft PR open
 

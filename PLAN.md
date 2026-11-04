@@ -20,5 +20,5 @@
 ## Tasks (TDD)
 - [x] 1. data shapes/determinism; KD loss with alpha=0 equals CE.
 - [x] 2. prune ratio 0 gives identical outputs (weight surgery is right); ratio 0.5 halves conv channels.
-- [x] 3. dynamic/static quant: smaller and accuracy within 2 points of float on a quickly trained model.
+- [x] 3. dynamic/static quant: smaller and accuracy within 3 points of float on a quickly trained model.
 - [x] 4. ONNX output ≈ torch output; study end to end; README; CI.

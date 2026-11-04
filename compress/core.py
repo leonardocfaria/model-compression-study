@@ -21,7 +21,7 @@ def load_data(size: int = 32):
     d = load_digits()
     X = torch.tensor(d.images, dtype=torch.float32).unsqueeze(1) / 16
     X = F.interpolate(X, size=(size, size), mode="bilinear", align_corners=False)
-    X = (X - 0.3) / 0.4
+    X = (X - 0.3) / 0.4  # rough centring/scaling (train mean ~0, std ~0.8); exact values don't matter
     y = torch.tensor(d.target)
     perm = torch.randperm(len(y), generator=torch.Generator().manual_seed(123))
     tr, te = perm[:1437], perm[1437:]
@@ -107,7 +107,8 @@ def prune_channels(model: Net, ratio: float) -> Net:
             dst.weight.copy_(src.weight[k][:, prev])
             dst.bias.copy_(src.bias[k])
             prev = k
-        cols = (keep[2][:, None] * 64 + torch.arange(64)).flatten()  # flatten order: channel-major, 8*8 positions
+        per_ch = h.fc1.in_features // f.conv3.out_channels  # spatial positions per channel (8*8 at size 32)
+        cols = (keep[2][:, None] * per_ch + torch.arange(per_ch)).flatten()  # Flatten is channel-major
         small.head.fc1.weight.copy_(h.fc1.weight[:, cols])
         small.head.fc1.bias.copy_(h.fc1.bias)
         small.head.fc2.load_state_dict(h.fc2.state_dict())
