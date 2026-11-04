@@ -1,0 +1,123 @@
+[
+  {
+    "model": "fp32 teacher (baseline)",
+    "runtime": "torch",
+    "acc": 0.9666666388511658,
+    "size_kb": 8568.8173828125,
+    "params": 2192650,
+    "lat1_ms": 2.1045240000034937,
+    "lat64_ms": 65.4331119999938,
+    "speedup64": 1.0,
+    "compression": 1.0
+  },
+  {
+    "model": "PTQ dynamic int8 (Linear)",
+    "runtime": "torch",
+    "acc": 0.9638888835906982,
+    "size_kb": 2418.8056640625,
+    "params": null,
+    "lat1_ms": 2.128241500003014,
+    "lat64_ms": 72.06558599999369,
+    "speedup64": 0.907966140731854,
+    "compression": 3.5425819899978075
+  },
+  {
+    "model": "PTQ static int8 (conv+linear)",
+    "runtime": "torch",
+    "acc": 0.9666666388511658,
+    "size_kb": 2160.3779296875,
+    "params": null,
+    "lat1_ms": 0.8830369999941468,
+    "lat64_ms": 6.056730000011612,
+    "speedup64": 10.803372777037833,
+    "compression": 3.966351102305505
+  },
+  {
+    "model": "pruned 50% channels, no fine-tune",
+    "runtime": "torch",
+    "acc": 0.4722222089767456,
+    "size_kb": 4201.8173828125,
+    "params": 1074698,
+    "lat1_ms": 0.9110769999836066,
+    "lat64_ms": 26.50511750002238,
+    "speedup64": 2.4686972996795262,
+    "compression": 2.0393121837858015
+  },
+  {
+    "model": "pruned 50% channels + 2 ep fine-tune",
+    "runtime": "torch",
+    "acc": 0.9555555582046509,
+    "size_kb": 4201.8173828125,
+    "params": 1074698,
+    "lat1_ms": 0.7560045000047921,
+    "lat64_ms": 29.541468000019222,
+    "speedup64": 2.2149580379672136,
+    "compression": 2.0393121837858015
+  },
+  {
+    "model": "student from scratch (4x narrower)",
+    "runtime": "torch",
+    "acc": 0.9583333134651184,
+    "size_kb": 541.6298828125,
+    "params": 137674,
+    "lat1_ms": 0.24262799999519302,
+    "lat64_ms": 9.266101999998,
+    "speedup64": 7.061557492029326,
+    "compression": 15.820429512340683
+  },
+  {
+    "model": "student distilled from teacher",
+    "runtime": "torch",
+    "acc": 0.9583333134651184,
+    "size_kb": 541.6298828125,
+    "params": 137674,
+    "lat1_ms": 0.3434785000138163,
+    "lat64_ms": 9.35088250000149,
+    "speedup64": 6.997533334418797,
+    "compression": 15.820429512340683
+  },
+  {
+    "model": "tiny student from scratch (16x narrower)",
+    "runtime": "torch",
+    "acc": 0.8861111402511597,
+    "size_kb": 38.2548828125,
+    "params": 8770,
+    "lat1_ms": 0.08064250002348672,
+    "lat64_ms": 3.1379920000063066,
+    "speedup64": 20.85190529480709,
+    "compression": 223.9927756362801
+  },
+  {
+    "model": "tiny student distilled",
+    "runtime": "torch",
+    "acc": 0.8500000238418579,
+    "size_kb": 38.2548828125,
+    "params": 8770,
+    "lat1_ms": 0.08367999998881714,
+    "lat64_ms": 3.1777229999931933,
+    "speedup64": 20.591194386714623,
+    "compression": 223.9927756362801
+  },
+  {
+    "model": "fp32 teacher (baseline)",
+    "runtime": "onnxruntime",
+    "acc": 0.9666666388511658,
+    "size_kb": 8567.2490234375,
+    "params": null,
+    "lat1_ms": 0.8540425000092,
+    "lat64_ms": 38.644471499992505,
+    "speedup64": 1.6932075782174039,
+    "compression": 1.0001830645252296
+  },
+  {
+    "model": "student distilled from teacher",
+    "runtime": "onnxruntime",
+    "acc": 0.9583333134651184,
+    "size_kb": 539.9853515625,
+    "params": null,
+    "lat1_ms": 0.09827349998658974,
+    "lat64_ms": 4.825839000005772,
+    "speedup64": 13.558909031137496,
+    "compression": 15.868610802159347
+  }
+]
